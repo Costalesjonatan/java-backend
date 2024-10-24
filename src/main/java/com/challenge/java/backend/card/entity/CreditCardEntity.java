@@ -10,14 +10,12 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.sql.Date;
-
 @Getter
 @Builder
 @Entity(name = "credit_card")
 @Table(name = "credit_card")
 @EqualsAndHashCode
-public class CreditCard {
+public class CreditCardEntity {
 
     @Id
     @Column(name = "id")
@@ -25,10 +23,12 @@ public class CreditCard {
     private Long id;
     @Column(name = "number")
     private String number;
+    @Column(name = "brand")
+    private String brand;
     @Column(name = "cardholder")
     private String cardHolder;
     @Column(name = "expiration_date")
-    private Date expirationDate;
+    private String expirationDate;
 
 
 
