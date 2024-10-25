@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -16,5 +18,5 @@ public class CreditCardDto {
     private String number;
     private String brand;
     private String cardHolder;
-    private String expirationDate;
+    private LocalDateTime expirationDate;
 }

@@ -8,15 +8,27 @@ import com.challenge.java.backend.card.validator.CreditCardValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class CreditCardService {
+public class CreditCardService implements CreditCardInterface {
 
     private final CreditCardRepository creditCardRepository;
     private final CreditCardMapper creditCardMapper;
     private final CreditCardValidator creditCardValidator;
+
+    public boolean operationIsValid(CreditCardDto creditCardDto, BigDecimal importValue) {
+        if(canOperate(creditCardDto)) {
+            return importValue.compareTo(BigDecimal.valueOf(1000L)) <= 0;
+        }
+        return false;
+    }
+
+    public boolean canOperate(CreditCardDto creditCardDto) {
+        return creditCardValidator.isDateAfterOfToday(creditCardDto.getExpirationDate());
+    }
 
     public CreditCardDto getCreditCardInformation(CreditCardDto creditCardToSearch) {
         if(!creditCardValidator.isValid(creditCardToSearch)) {

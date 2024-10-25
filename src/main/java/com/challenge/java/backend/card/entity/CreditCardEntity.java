@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @Entity(name = "credit_card")
@@ -28,7 +30,7 @@ public class CreditCardEntity {
     @Column(name = "cardholder")
     private String cardHolder;
     @Column(name = "expiration_date")
-    private String expirationDate;
+    private LocalDateTime expirationDate;
 
 
 

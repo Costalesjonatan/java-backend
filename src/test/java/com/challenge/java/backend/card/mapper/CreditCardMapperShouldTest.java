@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.spy;
@@ -22,7 +24,7 @@ class CreditCardMapperShouldTest {
             .number("000000000000000")
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,0))
             .build();
 
     private final CreditCardEntity creditCardEntity = CreditCardEntity.builder()
@@ -30,7 +32,7 @@ class CreditCardMapperShouldTest {
             .number("000000000000000")
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,0))
             .build();
 
     @BeforeEach
@@ -74,7 +76,11 @@ class CreditCardMapperShouldTest {
 
     private void thenACreditCardDtoIsReturned() {
         verify(creditCardMapper, only()).toDataTransferObject(creditCardEntity);
-        then(creditCardDtoReturned).isEqualTo(creditCardDtoExpected);
+        then(creditCardDtoReturned.getId()).isEqualTo(creditCardDtoExpected.getId());
+        then(creditCardDtoReturned.getNumber()).isEqualTo(creditCardDtoExpected.getNumber());
+        then(creditCardDtoReturned.getExpirationDate()).isEqualTo(creditCardDtoExpected.getExpirationDate());
+        then(creditCardDtoReturned.getCardHolder()).isEqualTo(creditCardDtoExpected.getCardHolder());
+        then(creditCardDtoReturned.getBrand()).isEqualTo(creditCardDtoExpected.getBrand());
         then(exceptionReturned).isNull();
     }
 

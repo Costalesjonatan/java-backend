@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -29,40 +31,44 @@ class CreditCardServiceShouldTest {
     private CreditCardService creditCardService;
     private CreditCardDto creditCardReturned;
     private boolean isEquals;
+    private boolean canOperate;
+    private boolean operationIsValid;
+    private Exception expectedException;
+
     private final CreditCardDto expectedCreditCard = CreditCardDto.builder()
             .id(1L)
             .number("000000000000000")
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,0))
             .build();
-    private Exception expectedException;
+
     private final CreditCardDto creditCardToObtainDto = CreditCardDto.builder()
             .number("000000000000000")
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,0))
             .build();
 
     private final CreditCardDto equalCreditCard = CreditCardDto.builder()
             .number("000000000000000")
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,0))
             .build();
 
     private final CreditCardDto notEqualCreditCard = CreditCardDto.builder()
             .number("1111111111111111")
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,0))
             .build();
 
     private final CreditCardDto invalidCreditCard = CreditCardDto.builder()
             .number(null)
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,1))
             .build();
 
     private final CreditCardEntity creditCardEntity = CreditCardEntity.builder()
@@ -70,7 +76,7 @@ class CreditCardServiceShouldTest {
             .number("000000000000000")
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,0))
             .build();
 
     @BeforeEach
@@ -119,6 +125,131 @@ class CreditCardServiceShouldTest {
         whenComparingInvalidCreditCards();
         thenFalseIsReturnedByInvalid();
     }
+
+    @Test
+    void validateExpirationDate() {
+        whenComparingInvalidCreditCards();
+        thenFalseIsReturnedByInvalid();
+    }
+
+    @Test
+    void returnTrueIfCreditCardCanOperate() {
+        whenIsVerifyingThatItCanOperate();
+        thenTrueIsReturnedBecauseCanOperate();
+    }
+
+    @Test
+    void returnFalseIfCreditCardCanOperate() {
+        whenIsVerifyingThatItCannotOperate();
+        thenFalseIsReturnedBecauseCannotOperate();
+    }
+
+    @Test
+    void returnTrueIfOperationIsValid() {
+        whenIsVerifyingValidOperation();
+        thenOperationIsValid();
+    }
+
+    @Test
+    void returnFalseIfOperationIsInvalid() {
+        whenIsVerifyingAnInvalidOperation();
+        thenOperationIsInvalid();
+    }
+
+    @Test
+    void returnFalseIfCreditCardCannotOperate() {
+        whenIsVerifyingAnCreditCardCannotOperate();
+        thenOperationIsInvalidBecauseCannotOperate();
+    }
+
+    private void thenOperationIsInvalidBecauseCannotOperate() {
+        verify(creditCardService, times(1)).operationIsValid(invalidCreditCard, BigDecimal.valueOf(1000.01));
+        verify(creditCardService, times(1)).canOperate(invalidCreditCard);
+
+        then(operationIsValid).isFalse();
+        then(expectedException).isNull();
+    }
+
+    private void whenIsVerifyingAnCreditCardCannotOperate() {
+        when(creditCardService.canOperate(invalidCreditCard)).thenReturn(false);
+        try {
+            operationIsValid = creditCardService.operationIsValid(invalidCreditCard, BigDecimal.valueOf(1000.01));
+        } catch (Exception exception) {
+            expectedException = exception;
+        }
+    }
+
+    private void whenIsVerifyingValidOperation() {
+        when(creditCardService.canOperate(expectedCreditCard)).thenReturn(true);
+        try {
+            operationIsValid = creditCardService.operationIsValid(expectedCreditCard, BigDecimal.valueOf(999.99));
+        } catch (Exception exception) {
+            expectedException = exception;
+        }
+    }
+
+    private void thenOperationIsValid() {
+        verify(creditCardService, times(1)).operationIsValid(expectedCreditCard, BigDecimal.valueOf(999.99));
+        verify(creditCardService, times(1)).canOperate(expectedCreditCard);
+
+        then(operationIsValid).isTrue();
+        then(expectedException).isNull();
+    }
+
+    private void whenIsVerifyingAnInvalidOperation() {
+        when(creditCardService.canOperate(expectedCreditCard)).thenReturn(true);
+        try {
+            operationIsValid = creditCardService.operationIsValid(expectedCreditCard, BigDecimal.valueOf(1000.01));
+        } catch (Exception exception) {
+            expectedException = exception;
+        }
+    }
+
+    private void thenOperationIsInvalid() {
+        verify(creditCardService, times(1)).operationIsValid(expectedCreditCard, BigDecimal.valueOf(1000.01));
+        verify(creditCardService, times(1)).canOperate(expectedCreditCard);
+
+        then(operationIsValid).isFalse();
+        then(expectedException).isNull();
+    }
+
+
+    private void whenIsVerifyingThatItCanOperate() {
+        when(creditCardValidator.isDateAfterOfToday(expectedCreditCard.getExpirationDate())).thenReturn(true);
+        try {
+            canOperate = creditCardService.canOperate(expectedCreditCard);
+        } catch (Exception exception) {
+            expectedException = exception;
+        }
+    }
+
+    private void thenTrueIsReturnedBecauseCanOperate() {
+        verify(creditCardService, only()).canOperate(expectedCreditCard);
+        verify(creditCardValidator, only()).isDateAfterOfToday(expectedCreditCard.getExpirationDate());
+        verify(creditCardMapper, never()).toDataTransferObject(creditCardEntity);
+
+        then(canOperate).isTrue();
+        then(expectedException).isNull();
+    }
+
+    private void whenIsVerifyingThatItCannotOperate() {
+        when(creditCardValidator.isDateAfterOfToday(expectedCreditCard.getExpirationDate())).thenReturn(false);
+        try {
+            canOperate = creditCardService.canOperate(expectedCreditCard);
+        } catch (Exception exception) {
+            expectedException = exception;
+        }
+    }
+
+    private void thenFalseIsReturnedBecauseCannotOperate() {
+        verify(creditCardService, only()).canOperate(expectedCreditCard);
+        verify(creditCardValidator, only()).isDateAfterOfToday(expectedCreditCard.getExpirationDate());
+        verify(creditCardMapper, never()).toDataTransferObject(creditCardEntity);
+
+        then(canOperate).isFalse();
+        then(expectedException).isNull();
+    }
+
 
     private void thenFalseIsReturnedByInvalid() {
         verify(creditCardService, only()).compareCreditCards(creditCardToObtainDto, invalidCreditCard);

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.spy;
@@ -20,14 +22,14 @@ class CreditCardValidatorShouldTest {
             .number("000000000000000")
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2030, 12, 1,0,0))
             .build();
 
     private final CreditCardDto invalidCreditCardDto = CreditCardDto.builder()
             .number(null)
             .cardHolder("CARD HOLDER")
             .brand("BRAND")
-            .expirationDate("12/30")
+            .expirationDate(LocalDateTime.of(2024, 10, 1,0,0))
             .build();
 
     @BeforeEach
@@ -52,6 +54,46 @@ class CreditCardValidatorShouldTest {
     void throwExceptionIfCreditCardDtoIsNull() {
         whenValidatingAnNullCreditCardDto();
         thenExceptionIsThrown();
+    }
+
+    @Test
+    void returnTrueIfExpirationDateIsValid() {
+        whenValidatingAnValidExpirationDate();
+        thenExpirationDateIsValid();
+    }
+
+    @Test
+    void returnFalseIfExpirationDateIsInvalid() {
+        whenValidatingAnInvalidExpirationDate();
+        thenExpirationDateIsInvalid();
+    }
+
+    private void whenValidatingAnInvalidExpirationDate() {
+        try {
+            returnedResult = creditCardValidator.isDateAfterOfToday(invalidCreditCardDto.getExpirationDate());
+        } catch (Exception exception) {
+            retunedException = exception;
+        }
+    }
+
+    private void thenExpirationDateIsInvalid() {
+        verify(creditCardValidator, only()).isDateAfterOfToday(invalidCreditCardDto.getExpirationDate());
+        then(returnedResult).isFalse();
+        then(retunedException).isNull();
+    }
+
+    private void whenValidatingAnValidExpirationDate() {
+        try {
+            returnedResult = creditCardValidator.isDateAfterOfToday(validCreditCardDto.getExpirationDate());
+        } catch (Exception exception) {
+            retunedException = exception;
+        }
+    }
+
+    private void thenExpirationDateIsValid() {
+        verify(creditCardValidator, only()).isDateAfterOfToday(validCreditCardDto.getExpirationDate());
+        then(returnedResult).isTrue();
+        then(retunedException).isNull();
     }
 
     private void whenValidatingAnNullCreditCardDto() {
