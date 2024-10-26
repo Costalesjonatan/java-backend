@@ -58,11 +58,14 @@ public class CreditCardService implements CreditCardInterface {
                 creditCardOne.getExpirationDate().equals(creditCardTwo.getExpirationDate());
     }
 
-    public BigDecimal getRate(String rate, BigDecimal operationAmount) {
+    public BigDecimal getRate(String brand, BigDecimal operationAmount) {
+        if(brand == null) {
+            throw new IllegalArgumentException("Invalid brand");
+        }
         LocalDateTime actualDate = LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
         BigDecimal rateAmount;
         float rateValue;
-        rateValue = getRateValue(rate, actualDate);
+        rateValue = getRateValue(brand, actualDate);
         rateAmount = getRateAmount(operationAmount, rateValue);
         return rateAmount;
     }
@@ -83,9 +86,9 @@ public class CreditCardService implements CreditCardInterface {
         return BigDecimal.valueOf(rateValue).multiply(operationAmount).divide(BigDecimal.valueOf(100), RoundingMode.UNNECESSARY);
     }
 
-    private float getRateValue(String rate, LocalDateTime actualDate) {
+    private float getRateValue(String brand, LocalDateTime actualDate) {
         float rateValue;
-        switch (rate.toUpperCase()) {
+        switch (brand.toUpperCase()) {
             case "VISA" -> {
                 int year = Integer.parseInt(String.valueOf(actualDate.getYear()).substring(2, 4));
                 int month = Integer.parseInt(String.valueOf(actualDate.getMonthValue()));

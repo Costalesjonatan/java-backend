@@ -9,4 +9,5 @@ public interface CreditCardInterface {
     boolean canOperate(CreditCardDto creditCardDto);
     CreditCardDto getCreditCardInformation(CreditCardDto creditCardToSearch);
     boolean compareCreditCards(CreditCardDto creditCardOne, CreditCardDto creditCardTwo);
+    BigDecimal getRate(String brand, BigDecimal operationAmount);
 }
