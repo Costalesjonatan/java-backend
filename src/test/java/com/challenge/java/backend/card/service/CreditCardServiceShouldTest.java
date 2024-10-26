@@ -3,7 +3,6 @@ package com.challenge.java.backend.card.service;
 import com.challenge.java.backend.card.dto.CreditCardDto;
 import com.challenge.java.backend.card.entity.CreditCardEntity;
 import com.challenge.java.backend.card.mapper.CreditCardMapper;
-import com.challenge.java.backend.card.rate.Rate;
 import com.challenge.java.backend.card.repository.CreditCardRepository;
 import com.challenge.java.backend.card.validator.CreditCardValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -163,16 +162,6 @@ class CreditCardServiceShouldTest {
     void returnFalseIfCreditCardCannotOperate() {
         whenIsVerifyingAnCreditCardCannotOperate();
         thenOperationIsInvalidBecauseCannotOperate();
-    }
-
-    @Test
-    void getVisaRate() {
-        try {
-            calculatedRate = creditCardService.getRate(Rate.VISA.name(), BigDecimal.valueOf(1000));
-            System.out.println(calculatedRate);
-        } catch (Exception exception) {
-            expectedException = exception;
-        }
     }
 
     private void thenOperationIsInvalidBecauseCannotOperate() {

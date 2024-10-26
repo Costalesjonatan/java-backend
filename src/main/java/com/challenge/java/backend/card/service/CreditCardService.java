@@ -22,9 +22,9 @@ public class CreditCardService implements CreditCardInterface {
     private final CreditCardMapper creditCardMapper;
     private final CreditCardValidator creditCardValidator;
 
-    public boolean operationIsValid(CreditCardDto creditCardDto, BigDecimal importValue) {
+    public boolean operationIsValid(CreditCardDto creditCardDto, BigDecimal operationAmount) {
         if(canOperate(creditCardDto)) {
-            return importValue.compareTo(BigDecimal.valueOf(1000L)) <= 0;
+            return operationAmount.compareTo(BigDecimal.valueOf(1000L)) <= 0;
         }
         return false;
     }
@@ -58,29 +58,29 @@ public class CreditCardService implements CreditCardInterface {
                 creditCardOne.getExpirationDate().equals(creditCardTwo.getExpirationDate());
     }
 
-    public BigDecimal getRate(String rate, BigDecimal importValue) {
+    public BigDecimal getRate(String rate, BigDecimal operationAmount) {
         LocalDateTime actualDate = LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
-        BigDecimal rateImport;
+        BigDecimal rateAmount;
         float rateValue;
         rateValue = getRateValue(rate, actualDate);
-        rateImport = getRateImport(importValue, rateValue);
-        return rateImport;
+        rateAmount = getRateAmount(operationAmount, rateValue);
+        return rateAmount;
     }
 
-    private BigDecimal getRateImport(BigDecimal importValue, float rateValue) {
-        BigDecimal rateImport;
+    private BigDecimal getRateAmount(BigDecimal operationAmount, float rateValue) {
+        BigDecimal rateAmount;
         if(rateValue <= 0.3) {
-            rateImport = calculateRateImport(0.3f, importValue);
+            rateAmount = calculateRateAmount(0.3f, operationAmount);
         } else if(rateValue >= 5) {
-            rateImport = calculateRateImport(5f, importValue);
+            rateAmount = calculateRateAmount(5f, operationAmount);
         } else {
-            rateImport = calculateRateImport(rateValue, importValue);
+            rateAmount = calculateRateAmount(rateValue, operationAmount);
         }
-        return rateImport;
+        return rateAmount;
     }
 
-    private BigDecimal calculateRateImport(float rateValue, BigDecimal importValue) {
-        return BigDecimal.valueOf(rateValue).multiply(importValue).divide(BigDecimal.valueOf(100), RoundingMode.UNNECESSARY);
+    private BigDecimal calculateRateAmount(float rateValue, BigDecimal operationAmount) {
+        return BigDecimal.valueOf(rateValue).multiply(operationAmount).divide(BigDecimal.valueOf(100), RoundingMode.UNNECESSARY);
     }
 
     private float getRateValue(String rate, LocalDateTime actualDate) {
